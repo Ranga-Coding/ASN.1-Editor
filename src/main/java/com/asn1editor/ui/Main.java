@@ -3,10 +3,12 @@ package com.asn1editor.ui;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -25,6 +27,13 @@ public class Main extends Application {
 
         primaryStage.setTitle("ASN.1 Editor");
         primaryStage.setScene(new Scene(root, 1000, 700));
+
+        // Fenster-Icon laden
+        InputStream iconStream = getClass().getResourceAsStream("/icon.png");
+        if (iconStream != null) {
+            primaryStage.getIcons().add(new Image(iconStream));
+        }
+
         primaryStage.show();
 
         File startupFile = resolveStartupFile();
