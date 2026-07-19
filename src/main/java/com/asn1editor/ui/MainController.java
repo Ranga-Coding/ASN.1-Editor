@@ -11,7 +11,6 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
-import com.asn1editor.ui.HexEditorControl;
 import javafx.stage.FileChooser;
 
 import java.io.File;
@@ -727,56 +726,7 @@ public class MainController {
 
     private static final int HEX_BYTES_PER_LINE = 16;
     private static final int HEX_COLUMN_WIDTH = HEX_BYTES_PER_LINE * 3 - 1;
-    private static final int ASCII_SEPARATOR_WIDTH = 2; // "  " zwischen Hex und ASCII
-
-    /**
-     * Prüft, ob eine Textposition im Hex-Editor eine editierbare Hex-Zeichen-Position ist.
-     *
-     * <p>Gültige Positionen: Die beiden Zeichen jedes Hex-Bytes (0-9, A-F). Ungültig:
-     * Leerzeichen zwischen Bytes, ASCII-Spalte, Zeilenenden.
-     */
-    private boolean isHexEditablePosition(int textPos) {
-        String text = hexEditorArea.getText();
-        if (textPos < 0 || textPos > text.length()) {
-            return false;
-        }
-        if (text.isEmpty()) {
-            return true; // Am Anfang einer leeren TextArea erlauben
-        }
-
-        // Aktuelle Zeile und Position innerhalb der Zeile ermitteln
-        int lineStart = text.lastIndexOf('\n', textPos - 1) + 1;
-        int posInLine = textPos - lineStart;
-        int lineLen = text.indexOf('\n', lineStart);
-        if (lineLen < 0) {
-            lineLen = text.length() - lineStart;
-        }
-
-        // Zeilenende prüfen
-        if (posInLine >= lineLen) {
-            return false;
-        }
-
-        // ASCII-Spalne beginnen nach HEX_COLUMN_WIDTH + ASCII_SEPARATOR_WIDTH
-        int asciiStart = HEX_COLUMN_WIDTH + ASCII_SEPARATOR_WIDTH;
-        if (posInLine >= asciiStart) {
-            return false; // ASCII-Spalne nicht editierbar
-        }
-
-        // Innerhalb der Hex-Spalne: Prüfen ob es eine gültige Hex-Zeichen-Position ist
-        // Jedes Byte: 2 Hex-Zeichen + 1 Leerzeichen (außer letztes Byte)
-        // Position 0,1 = Byte 0, Position 3,4 = Byte 1, etc.
-        int charInByte = posInLine % 3;
-
-        // Leerzeichen zwischen Bytes (charInByte == 2) nicht editierbar
-        if (charInByte == 2) {
-            return false;
-        }
-
-        // Letztes Byte hat kein trailing space, aber das ist hier nicht relevant
-        return true;
-    }
-
+ 
     /**
      * Zeigt den Hex-Inhalt von Byte-Daten im Hex-Editor an.
      *
