@@ -534,6 +534,11 @@ public class MainController {
         expandTree(root);
         treeView.setRoot(root);
         treeView.setShowRoot(false);
+
+        // Nach dem rebuild verweist die Selection noch auf das alte TreeItem.
+        // Auswahl zurücksetzen, damit highlightSelectedNode beim nächsten Klick
+        // den korrekten Node aus dem neuen TreeView verwendet.
+        treeView.getSelectionModel().clearSelection();
     }
 
     /**

@@ -113,7 +113,7 @@ public final class ASN1BerEncoder {
      */
     private static void encodeTag(ASN1Node node, ByteArrayOutputStream out) throws IOException {
         TagInfo tagInfo = parseTagInfo(node.name());
-        int tagByte = (tagInfo.tagClass << 6) | ((tagInfo.constructed ? 1 : 0) << 5) | tagInfo.tagNumber;
+        int tagByte = (tagInfo.tagClass() << 6) | ((tagInfo.constructed() ? 1 : 0) << 5) | tagInfo.tagNumber();
         out.write(tagByte);
     }
 
@@ -136,7 +136,7 @@ public final class ASN1BerEncoder {
             int closeBracket = baseName.indexOf(']');
             if (closeBracket > 0) {
                 int tagNumber = Integer.parseInt(baseName.substring("APPLICATION[".length(), closeBracket));
-                return new TagInfo(1, tagNumber, constructed);
+                return new TagInfo(1, tagNumber, constructed, baseName);
             }
         }
 
@@ -145,7 +145,7 @@ public final class ASN1BerEncoder {
             int closeBracket = baseName.indexOf(']');
             if (closeBracket > 0) {
                 int tagNumber = Integer.parseInt(baseName.substring("CONTEXT[".length(), closeBracket));
-                return new TagInfo(2, tagNumber, constructed);
+                return new TagInfo(2, tagNumber, constructed, baseName);
             }
         }
 
@@ -154,13 +154,13 @@ public final class ASN1BerEncoder {
             int closeBracket = baseName.indexOf(']');
             if (closeBracket > 0) {
                 int tagNumber = Integer.parseInt(baseName.substring("PRIVATE[".length(), closeBracket));
-                return new TagInfo(3, tagNumber, constructed);
+                return new TagInfo(3, tagNumber, constructed, baseName);
             }
         }
 
         // UNIVERSAL-Typen
         int tagNumber = universalTagNumber(baseName);
-        return new TagInfo(0, tagNumber, constructed);
+        return new TagInfo(0, tagNumber, constructed, baseName);
     }
 
     /**
@@ -249,17 +249,8 @@ public final class ASN1BerEncoder {
         return result;
     }
 
-    // ─── TagInfo-Record ────────────────────────────────────────────────
-
-    /**
-     * Beschreibt ein ASN.1-Tag.
-     *
-     * @param tagClass    0=UNIVERSAL, 1=APPLICATION, 2=CONTEXT-SPECIFIC, 3=PRIVATE
-     * @param tagNumber   die Tag-Number
-     * @param constructed true wenn konstruktiv
-     */
-    private record TagInfo(int tagClass, int tagNumber, boolean constructed) {
-    }
+    // ─── TagInfo-Referenz ──────────────────────────────────────────────
+    // Verwendet den gemeinsamen Record aus TagInfo.java
 
     /**
      * Exception für BER/DER-Encoding-Fehler.

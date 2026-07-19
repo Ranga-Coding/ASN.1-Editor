@@ -255,12 +255,7 @@ public class ASN1Service {
      * @return Hex-String, z.B. "30 80 06 09"
      */
     public static String toHexString(byte[] bytes) {
-        StringBuilder sb = new StringBuilder(bytes.length * 3);
-        for (int i = 0; i < bytes.length; i++) {
-            if (i > 0) sb.append(' ');
-            sb.append(String.format("%02X", bytes[i] & 0xFF));
-        }
-        return sb.toString();
+        return HexUtils.toHexString(bytes);
     }
 
     /**
@@ -321,14 +316,6 @@ public class ASN1Service {
      *
      * @param source der zu prüfende ASN.1-Quelltext
      * @return der Originaltext, die Base64-decodierte UTF-8-Version oder Hex-String
-     */
-    /**
-     * Decodiert Base64/PEM-Inhalt und gibt den decodierten String zurück.
-     *
-     * <p>Bei Binärdaten (BER/DER) wird ein Hex-String zurückgegeben.
-     *
-     * @param source der zu prüfende ASN.1-Quelltext
-     * @return decodierter Inhalt oder Original bei Fehler
      */
     public String decodeBase64IfNeeded(String source) {
         if (source == null || source.isEmpty()) {
@@ -425,16 +412,7 @@ public class ASN1Service {
         return true;
     }
 
-    /**
-     * Konvertiert einen Byte-Array zu einem Hex-String.
-     */
-    static String bytesToHex(byte[] bytes) {
-        StringBuilder sb = new StringBuilder(bytes.length * 2);
-        for (byte b : bytes) {
-            sb.append(String.format("%02X ", b));
-        }
-        return sb.toString().trim();
-    }
+
 
     /**
      * Validiert den ASN.1-Quelltext (delegiert an den Parser).

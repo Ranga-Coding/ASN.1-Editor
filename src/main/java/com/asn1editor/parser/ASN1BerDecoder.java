@@ -162,25 +162,8 @@ public final class ASN1BerDecoder {
             Map.entry("0.4.0.127.7.22", "bsiRSA-SHA224")
     );
 
-    // ─── TagInfo-Record ────────────────────────────────────────────────
-
-    /**
-     * Beschreibt ein ASN.1-Tag aus einem TLV-Element.
-     *
-     * @param number       die Tag-Number
-     * @param name         der ASN.1-Typname (z.B. "SEQUENCE", "INTEGER")
-     * @param constructed  true wenn konstruktiv (P-Flag gesetzt)
-     * @param tagClass     0=UNIVERSAL, 1=APPLICATION, 2=CONTEXT-SPECIFIC, 3=PRIVATE
-     */
-    private static record TagInfo(int number, String name, boolean constructed, int tagClass) {
-        /**
-         * Gibt den Anzeigenamen des Tags zurück.
-         * Für konstruktive Typen wird "[CONSTRUCTED]" angehängt.
-         */
-        String getDisplayName() {
-            return name + (constructed ? " [CONSTRUCTED]" : "");
-        }
-    }
+    // ─── TagInfo-Referenz ──────────────────────────────────────────────
+    // Verwendet den gemeinsamen Record aus TagInfo.java
 
     // ─── Öffentliche API ───────────────────────────────────────────────
 
@@ -271,7 +254,7 @@ public final class ASN1BerDecoder {
 
 
             if (length == INDEFINITE_LENGTH) {
-                if (!tagInfo.constructed) {
+                if (!tagInfo.constructed()) {
                     throw new BERDecodeException("Indefinite Länge ist nur für konstruktive BER-Typen erlaubt.", pos, 0);
                 }
                 List<ASN1Node> children = readChildrenUntilEoc(valueAbsOffset, valueAbsOffset - absOffsetStart);
@@ -379,7 +362,7 @@ public final class ASN1BerDecoder {
             String name = tagInfo.getDisplayName();
 
             // Konstruktive Typen → rekursiv decodieren
-            if (tagInfo.constructed) {
+            if (tagInfo.constructed()) {
                 List<ASN1Node> children = readChildren(value, valueAbsOffset);
                 return ASN1Node.internal(name, children, offset, length);
             }
@@ -387,43 +370,43 @@ public final class ASN1BerDecoder {
             // Primitiver Typ → Leaf-Knoten
             String hexValue = bytesToHex(value);
 
-            if (tagInfo.name.equals("INTEGER")) {
+            if (tagInfo.name().equals("INTEGER")) {
                 int intValue = valueToInt(value);
                 return ASN1Node.internal(name, List.of(
-                        ASN1Node.leaf("kind", tagInfo.name),
+                        ASN1Node.leaf("kind", tagInfo.name()),
                         ASN1Node.leaf("hex", hexValue),
                         ASN1Node.leaf("value", String.valueOf(intValue))
                 ), offset, length);
             }
 
-            if (tagInfo.name.equals("BOOLEAN")) {
+            if (tagInfo.name().equals("BOOLEAN")) {
                 boolean boolValue = (value.length > 0 && value[0] != 0);
                 return ASN1Node.internal(name, List.of(
-                        ASN1Node.leaf("kind", tagInfo.name),
+                        ASN1Node.leaf("kind", tagInfo.name()),
                         ASN1Node.leaf("hex", hexValue),
                         ASN1Node.leaf("value", String.valueOf(boolValue))
                 ), offset, length);
             }
 
-            if (tagInfo.name.equals("NULL")) {
+            if (tagInfo.name().equals("NULL")) {
                 return ASN1Node.internal(name, List.of(
-                        ASN1Node.leaf("kind", tagInfo.name),
+                        ASN1Node.leaf("kind", tagInfo.name()),
                         ASN1Node.leaf("value", "null")
                 ), offset, length);
             }
 
-            if (tagInfo.name.equals("OBJECT IDENTIFIER")) {
+            if (tagInfo.name().equals("OBJECT IDENTIFIER")) {
                 String oidValue = decodeOid(value);
                 String displayValue = formatOidValue(oidValue);
                 return ASN1Node.internal(name, List.of(
-                        ASN1Node.leaf("kind", tagInfo.name),
+                        ASN1Node.leaf("kind", tagInfo.name()),
                         ASN1Node.leaf("hex", hexValue),
                         ASN1Node.leaf("value", displayValue),
                         ASN1Node.leaf("oid", oidValue)
                 ), offset, length);
             }
 
-            if (tagInfo.name.equals("BIT STRING")) {
+            if (tagInfo.name().equals("BIT STRING")) {
                 if (value.length > 0) {
                     int unusedBits = value[0];
                     StringBuilder hexNoPadding = new StringBuilder();
@@ -431,31 +414,31 @@ public final class ASN1BerDecoder {
                         hexNoPadding.append(String.format("%02X", value[i] & 0xFF));
                     }
                     return ASN1Node.internal(name, List.of(
-                            ASN1Node.leaf("kind", tagInfo.name),
+                            ASN1Node.leaf("kind", tagInfo.name()),
                             ASN1Node.leaf("hex", hexValue),
                             ASN1Node.leaf("value", hexNoPadding.toString()),
                             ASN1Node.leaf("unusedBits", String.valueOf(unusedBits))
                     ), offset, length);
                 }
                 return ASN1Node.internal(name, List.of(
-                        ASN1Node.leaf("kind", tagInfo.name),
+                        ASN1Node.leaf("kind", tagInfo.name()),
                         ASN1Node.leaf("hex", hexValue)
                 ), offset, length);
             }
 
-            if (tagInfo.name.equals("OCTET STRING")) {
+            if (tagInfo.name().equals("OCTET STRING")) {
                 String text = tryAsText(value);
                 return ASN1Node.internal(name, List.of(
-                        ASN1Node.leaf("kind", tagInfo.name),
+                        ASN1Node.leaf("kind", tagInfo.name()),
                         ASN1Node.leaf("hex", hexValue),
                         ASN1Node.leaf("value", text)
                 ), offset, length);
             }
 
-            if (isStringType(tagInfo.name)) {
+            if (isStringType(tagInfo.name())) {
                 String text = tryAsText(value);
                 return ASN1Node.internal(name, List.of(
-                        ASN1Node.leaf("kind", tagInfo.name),
+                        ASN1Node.leaf("kind", tagInfo.name()),
                         ASN1Node.leaf("hex", hexValue),
                         ASN1Node.leaf("value", text)
                 ), offset, length);
@@ -463,7 +446,7 @@ public final class ASN1BerDecoder {
 
             // Generic primitive
             return ASN1Node.internal(name, List.of(
-                    ASN1Node.leaf("kind", tagInfo.name),
+                    ASN1Node.leaf("kind", tagInfo.name()),
                     ASN1Node.leaf("hex", hexValue)
             ), offset, length);
         }
@@ -480,7 +463,7 @@ public final class ASN1BerDecoder {
 
             if (tagClass == 0 && tagNumber == 0x1F) {
                 // Long form tag — wird später gelesen
-                return new TagInfo(0x1F, "LONG_TAG", constructed, tagClass);
+                return new TagInfo(tagClass, 0x1F, constructed, "LONG_TAG");
             }
 
             String name = ASN1BerDecoder.universalTagName(tagClass, tagNumber);
@@ -490,7 +473,7 @@ public final class ASN1BerDecoder {
                 isConstructed = true; // SEQUENCE und SET sind immer konstruktiv
             }
 
-            return new TagInfo(tagNumber, name, isConstructed, tagClass);
+            return new TagInfo(tagClass, tagNumber, isConstructed, name);
         }
 
         // ─── Längen-Lesen ──────────────────────────────────────────────
@@ -572,20 +555,14 @@ public final class ASN1BerDecoder {
 
     /**
      * Konvertiert ein Byte-Array zu einem int (Zweierkomplement, big-endian).
+     * Verwendet BigInteger für korrekte Behandlung großer Werte.
      */
     private static int valueToInt(byte[] value) {
         if (value.length == 0) {
             return 0;
         }
-        if (value.length == 1) {
-            return value[0] & 0xFF;
-        }
-        // BigInteger wäre präziser, aber wir machen es einfach
-        int result = 0;
-        for (byte b : value) {
-            result = (result << 8) | (b & 0xFF);
-        }
-        return result;
+        // BigInteger behandelt Zweierkomplement korrekt
+        return new java.math.BigInteger(value).intValue();
     }
 
     /**
@@ -665,10 +642,6 @@ public final class ASN1BerDecoder {
      * Konvertiert Byte-Array zu Hex-String.
      */
     private static String bytesToHex(byte[] bytes) {
-        StringBuilder sb = new StringBuilder(bytes.length * 2);
-        for (byte b : bytes) {
-            sb.append(String.format("%02X", b & 0xFF));
-        }
-        return sb.toString();
+        return com.asn1editor.service.HexUtils.toCompactHex(bytes);
     }
 }

@@ -3,22 +3,98 @@ package com.asn1editor.service;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * Einfacher Dateilogger für ASN.1 Editor.
+ * Dateilogger für ASN.1 Editor.
  *
- * <p>Schreibt Logeinträge in eine Datei im Projektverzeichnis
- * und gibt Warnungen/Errors über System.err aus.
+ * <p>Schreibt Logeinträge in eine Datei im User-Home-Verzeichnis
+ * (konfigurierbar über System Property {@code asn1editor.log.file}).
+ * Unterstützt automatische Log-Rotation (max 10 MB, max 5 Dateien).
+ *
+ * <p>Thread-sicherheit: Alle Schreiboperationen sind synchronisiert.
  */
 public final class ASN1Logger {
 
-    private static final Path LOG_FILE = Path.of("asn1-editor.log");
+    private static final String LOG_DIR_NAME = ".asn1-editor";
+    private static final String LOG_FILE_NAME = "asn1-editor.log";
+    private static final long MAX_LOG_SIZE_BYTES = 10L * 1024 * 1024; // 10 MB
+    private static final int MAX_LOG_FILES = 5;
+
+    static final Path LOG_FILE = resolveLogFile();
+
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
     private ASN1Logger() {
         // nicht instanzierbar
+    }
+
+    // ─── Log-Datei Auflösung ─────────────────────────────────────────
+
+    private static Path resolveLogFile() {
+        // 1. System Property
+        String customPath = System.getProperty("asn1editor.log.file");
+        if (customPath != null && !customPath.isBlank()) {
+            return Path.of(customPath);
+        }
+
+        // 2. User-Home-Verzeichnis
+        String userHome = System.getProperty("user.home");
+        if (userHome == null || userHome.isBlank()) {
+            return Path.of(LOG_FILE_NAME); // Fallback
+        }
+
+        Path logDir = Path.of(userHome, LOG_DIR_NAME);
+        try {
+            Files.createDirectories(logDir);
+        } catch (IOException e) {
+            System.err.println("Konnte Log-Verzeichnis nicht erstellen: " + logDir + " — verwende " + LOG_FILE_NAME);
+            return Path.of(LOG_FILE_NAME);
+        }
+
+        return logDir.resolve(LOG_FILE_NAME);
+    }
+
+    // ─── Log-Rotation ────────────────────────────────────────────────
+
+    private static synchronized void rotateIfNeeded() {
+        if (!Files.exists(LOG_FILE)) {
+            return;
+        }
+
+        try {
+            long size = Files.size(LOG_FILE);
+            if (size <= MAX_LOG_SIZE_BYTES) {
+                return;
+            }
+
+            // Alte Logs umbenennen
+            List<Path> existing = Files.list(LOG_FILE.getParent())
+                    .filter(p -> p.getFileName().toString().startsWith("asn1-editor"))
+                    .sorted(Comparator.comparingLong(p -> { try { return Files.getLastModifiedTime(p).toMillis(); } catch (IOException e) { return Long.MAX_VALUE; } }))
+                    .collect(Collectors.toList());
+
+            // Älteste löschen wenn > MAX_LOG_FILES
+            while (existing.size() >= MAX_LOG_FILES) {
+                Path oldest = existing.remove(0);
+                Files.delete(oldest);
+            }
+
+            // Aktuelle Log-Datei umbenennen
+            Path rotated = LOG_FILE.getParent().resolve("asn1-editor.log.1");
+            if (Files.exists(rotated)) {
+                Files.delete(rotated);
+            }
+            Files.move(LOG_FILE, rotated);
+        } catch (IOException e) {
+            System.err.println("Log-Rotation fehlgeschlagen: " + e.getMessage());
+        }
     }
 
     // ─── Öffentliche API ─────────────────────────────────────────────
@@ -118,6 +194,7 @@ public final class ASN1Logger {
 
     private static synchronized void writeLine(String line) {
         try {
+            rotateIfNeeded();
             Files.writeString(LOG_FILE, line + System.lineSeparator(),
                     java.nio.file.StandardOpenOption.CREATE,
                     java.nio.file.StandardOpenOption.APPEND);
