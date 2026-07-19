@@ -50,6 +50,9 @@ nul
 # === tmp files ===
 tmp/
 
+# === internal Documentation ===
+docs/
+
 # === Local build artifacts ===
 DebugTest.class
 DebugTest.java
