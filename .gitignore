@@ -47,6 +47,8 @@ asn1-editor.log
 *.swo
 *~
 nul
+# === tmp files ===
+tmp/
 
 # === Local build artifacts ===
 DebugTest.class
