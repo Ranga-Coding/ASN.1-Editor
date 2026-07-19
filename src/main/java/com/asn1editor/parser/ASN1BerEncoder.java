@@ -4,7 +4,6 @@ import com.asn1editor.model.ASN1Node;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.List;
 
 /**
  * BER/DER-Encoder für ASN.1-Daten.

@@ -111,11 +111,6 @@ public class ASN1Parser {
         return tokens.get(pos);
     }
 
-    private Token peek(int offset) {
-        int idx = pos + offset;
-        return idx < tokens.size() ? tokens.get(idx) : tokens.get(tokens.size() - 1);
-    }
-
     private Token current() {
         return tokens.get(pos);
     }

@@ -4,7 +4,6 @@ import com.asn1editor.model.ASN1Node;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -36,11 +35,6 @@ class HighlightPositionTest {
         // Simuliere renderHighlight() für bytes 0-5
         int highlightStart = 0;
         int highlightEnd = 5;
-
-        int lineStartRow = highlightStart / BYTES_PER_ROW; // 0
-        int lineEndRow = Math.min((highlightEnd - 1) / BYTES_PER_ROW, 0); // 0
-        assertEquals(0, lineStartRow);
-        assertEquals(0, lineEndRow);
 
         int rowStartByte = 0;
         int rowEndByte = Math.min(16, 5); // 5
@@ -82,11 +76,8 @@ class HighlightPositionTest {
         int highlightStart = 0;
         int highlightEnd = 44;
 
-        int lineStartRow = highlightStart / BYTES_PER_ROW; // 0
-        int lineEndRow = Math.min((highlightEnd - 1) / BYTES_PER_ROW, 2); // 43/16=2
-
-        for (int row = lineStartRow; row <= lineEndRow; row++) {
-            int rowStartByte = row * BYTES_PER_ROW;
+        for (int row = 0; row <= 2; row++) {
+                int rowStartByte = row * BYTES_PER_ROW;
             int rowEndByte = Math.min(rowStartByte + BYTES_PER_ROW, data.length);
 
             int startByteInRow = Math.max(0, highlightStart - rowStartByte);
@@ -128,9 +119,6 @@ class HighlightPositionTest {
 
         int highlightStart = 10;
         int highlightEnd = 20;
-
-        int lineStartRow = highlightStart / BYTES_PER_ROW; // 0
-        int lineEndRow = Math.min((highlightEnd - 1) / BYTES_PER_ROW, 1); // 19/16=1
 
         // Zeile 0: relative bytes 10-15 (6 Bytes)
         int row0StartByte = Math.max(0, highlightStart - 0); // 10
@@ -243,10 +231,7 @@ class HighlightPositionTest {
         int highlightStart = 0;
         int highlightEnd = 32;
 
-        int lineStartRow = 0;
-        int lineEndRow = Math.min(31 / BYTES_PER_ROW, 1); // 1
-
-        for (int row = 0; row <= lineEndRow; row++) {
+        for (int row = 0; row <= 1; row++) {
             int rowStartByte = row * BYTES_PER_ROW;
             int rowEndByte = Math.min(rowStartByte + BYTES_PER_ROW, data.length);
 
@@ -280,7 +265,6 @@ class HighlightPositionTest {
         int highlightStart = 8;
         int highlightEnd = 9; // exclusive
 
-        int row = 0;
         int rowStartByte = 0;
         int rowEndByte = Math.min(16, 32); // 16
 

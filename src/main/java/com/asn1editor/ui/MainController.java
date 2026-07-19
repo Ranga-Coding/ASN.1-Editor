@@ -11,7 +11,6 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
 import com.asn1editor.ui.HexEditorControl;
 import javafx.stage.FileChooser;
 
@@ -44,12 +43,6 @@ public class MainController {
     @FXML
     private VBox rootPane;
 
-    /**
-     * SplitPane für Details + Hex-Editor nebeneinander.
-     */
-    @FXML
-    private SplitPane rightSplitPane;
-
     @FXML
     private Label statusLabel;
 
@@ -63,11 +56,6 @@ public class MainController {
     private byte[] currentHexBytes;
 
     /**
-     * True wenn TreeView und Hex-Editor synchronisiert sind (TreeView wurde über BER/DER decodiert).
-     */
-    private boolean treeSyncedWithHex = false;
-
-    /**
      * True wenn der Hex-Editor seit der letzten Synchronisierung geändert wurde.
      */
     private boolean hexDirty = false;
@@ -78,7 +66,6 @@ public class MainController {
     private final ASN1FileIO fileIO = new ASN1FileIO();
     private final Preferences preferences = Preferences.userNodeForPackage(MainController.class);
     private File currentFile;
-    private com.asn1editor.service.ASN1Service.FileFormat currentFileFormat;
 
     /**
      * True wenn es sich um eine Binärdatei (BER/DER) handelt.
@@ -308,9 +295,9 @@ public class MainController {
             if ("BASE64".equals(fileFormat)) {
                 String decodedContent = service.decodeBase64IfNeeded(rawText);
 
-                if (service.isHexString(decodedContent)) {
+                if (ASN1Service.isHexString(decodedContent)) {
                     // Decodierte Binärdaten (BER/DER) — rawArea ausblenden
-                    byte[] decodedBytes = service.fromHexString(decodedContent);
+                    byte[] decodedBytes = ASN1Service.fromHexString(decodedContent);
                     currentHexBytes = decodedBytes;
                     isBinaryFile = true;
                     buildHexEditor(decodedBytes);
@@ -468,7 +455,6 @@ public class MainController {
         if (hasBerNodes) {
             syncHexFromTree();
         } else {
-            treeSyncedWithHex = false;
         }
     }
 
@@ -504,11 +490,9 @@ public class MainController {
             ASN1Node encodedRoot = com.asn1editor.parser.ASN1BerDecoder.decode(encoded);
             rebuildTreeViewWithEncodedRoot(encodedRoot);
 
-            treeSyncedWithHex = true;
             hexStatusLabel.setText(encoded.length + " Bytes — synchronisiert");
             statusLabel.setText("TreeView → Hex synchronisiert: " + encoded.length + " Bytes");
         } catch (Exception e) {
-            treeSyncedWithHex = false;
             hexStatusLabel.setText("Fehler!");
             statusLabel.setText("TreeView-Synchronisation fehlgeschlagen: " + e.getMessage());
         }
@@ -744,7 +728,6 @@ public class MainController {
     private static final int HEX_BYTES_PER_LINE = 16;
     private static final int HEX_COLUMN_WIDTH = HEX_BYTES_PER_LINE * 3 - 1;
     private static final int ASCII_SEPARATOR_WIDTH = 2; // "  " zwischen Hex und ASCII
-    private static final int LINE_ENDING_WIDTH = System.lineSeparator().length();
 
     /**
      * Prüft, ob eine Textposition im Hex-Editor eine editierbare Hex-Zeichen-Position ist.
@@ -783,7 +766,6 @@ public class MainController {
         // Innerhalb der Hex-Spalne: Prüfen ob es eine gültige Hex-Zeichen-Position ist
         // Jedes Byte: 2 Hex-Zeichen + 1 Leerzeichen (außer letztes Byte)
         // Position 0,1 = Byte 0, Position 3,4 = Byte 1, etc.
-        int byteIndex = posInLine / 3;
         int charInByte = posInLine % 3;
 
         // Leerzeichen zwischen Bytes (charInByte == 2) nicht editierbar
@@ -863,35 +845,6 @@ public class MainController {
             hexStatusLabel.setText("Fehler!");
             statusLabel.setText("Automatische Synchronisation fehlgeschlagen: " + e.getMessage());
         }
-    }
-
-    private String formatHexEditor(byte[] data) {
-        StringBuilder text = new StringBuilder(data.length * 4);
-        for (int offset = 0; offset < data.length; offset += HEX_BYTES_PER_LINE) {
-            StringBuilder hex = new StringBuilder(HEX_COLUMN_WIDTH);
-            StringBuilder ascii = new StringBuilder(HEX_BYTES_PER_LINE);
-
-            for (int i = 0; i < HEX_BYTES_PER_LINE; i++) {
-                int index = offset + i;
-                if (index < data.length) {
-                    int value = data[index] & 0xFF;
-                    hex.append(String.format("%02X", value));
-                    ascii.append(toPrintableAscii(value));
-                } else {
-                    hex.append("  ");
-                }
-                if (i < HEX_BYTES_PER_LINE - 1) {
-                    hex.append(' ');
-                }
-            }
-
-            text.append(hex).append("  ").append(ascii).append(System.lineSeparator());
-        }
-        return text.toString();
-    }
-
-    private char toPrintableAscii(int value) {
-        return value >= 32 && value <= 126 ? (char) value : '.';
     }
 
     /**
@@ -1048,7 +1001,7 @@ public class MainController {
      * Zeigt Hex-Inhalt einer binären ASN.1-Datei an.
      */
     private void showBinaryHex(String fileName, String hexContent) {
-        byte[] bytes = service.fromHexString(hexContent);
+        byte[] bytes = ASN1Service.fromHexString(hexContent);
         rawArea.setText(hexContent);
         currentHexBytes = bytes;
         isBinaryFile = true;

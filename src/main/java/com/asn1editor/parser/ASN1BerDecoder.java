@@ -269,16 +269,6 @@ public final class ASN1BerDecoder {
         }
 
         /**
-         * Liest ein Byte an der aktuellen Position.
-         */
-        byte readByte() throws BERDecodeException {
-            if (pos >= data.length) {
-                throw new BERDecodeException("Unerwartetes Ende der Daten beim Lesen eines Bytes.", pos, 0);
-            }
-            return data[pos++];
-        }
-
-        /**
          * Liest n Bytes ab der aktuellen Position.
          */
         byte[] readBytes(int length) throws BERDecodeException {

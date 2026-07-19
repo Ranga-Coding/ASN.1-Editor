@@ -104,7 +104,6 @@ public class ASN1Service {
             case BINARY -> {
                 // Roh-Binärdaten → Hex-Darstellung für Anzeige
                 binaryData = source.getBytes(java.nio.charset.StandardCharsets.ISO_8859_1);
-                String hex = toHexString(binaryData);
                 ASN1Logger.logBinarySnippet(binaryData, 64);
                 isBinary = true;
             }

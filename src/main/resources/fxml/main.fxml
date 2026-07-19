@@ -49,7 +49,7 @@
         </TreeView>
 
         <!-- Rechte Seite: Details und Hex-Editor nebeneinander -->
-        <SplitPane fx:id="rightSplitPane" dividerPositions="0.25">
+        <SplitPane dividerPositions="0.25">
             <!-- Details -->
             <TextArea fx:id="detailsArea"
                       editable="false"

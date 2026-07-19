@@ -3,7 +3,6 @@ package com.asn1editor.parser;
 import com.asn1editor.model.ASN1Node;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;

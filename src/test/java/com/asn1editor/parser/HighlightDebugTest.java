@@ -3,7 +3,6 @@ package com.asn1editor.parser;
 import com.asn1editor.model.ASN1Node;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -98,13 +97,5 @@ class HighlightDebugTest {
         assertEquals(1, intNode.size());
         assertEquals(4, intNode.get(0).offset());
         assertEquals(3, intNode.get(0).length());
-    }
-
-    private String bytesToHex(byte[] bytes) {
-        StringBuilder sb = new StringBuilder();
-        for (byte b : bytes) {
-            sb.append(String.format("%02X ", b & 0xFF));
-        }
-        return sb.toString().trim();
     }
 }

@@ -152,8 +152,6 @@ class RebuildTreeViewTest {
 
         // Re-decodieren
         ASN1Node newRoot = ASN1BerDecoder.decode(encoded);
-        ASN1Document newDoc = new ASN1Document(newRoot);
-
         // Strukturvergleich
         assertEquals(originalRoot.children().size(), newRoot.children().size(),
             "Anzahl der Root-Kinder sollte gleich bleiben");
@@ -191,8 +189,6 @@ class RebuildTreeViewTest {
                     child.name() + " Ende innerhalb von data");
 
                 // Bytes am angegebenen Offset sollten mit dem Tag-Byte uebereinstimmen
-                byte tagByte = data[child.offset()];
-                byte expectedTag = (byte)(child.offset() >= 0 ? tagByte : 0);
                 assertTrue(child.offset() + 1 <= data.length,
                     child.name() + " Tag-Byte lesbar");
 

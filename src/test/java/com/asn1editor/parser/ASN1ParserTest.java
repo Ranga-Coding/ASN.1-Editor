@@ -2,8 +2,6 @@ package com.asn1editor.parser;
 
 import com.asn1editor.model.ASN1Document;
 import com.asn1editor.model.ASN1Node;
-import com.asn1editor.parser.ASN1ParseException;
-import com.asn1editor.parser.Token;
 import com.asn1editor.service.ASN1IOException;
 import com.asn1editor.service.ASN1Service;
 
@@ -88,7 +86,7 @@ class ASN1ParserTest {
         // Direkter Lexer-Test zur Isolierung
         String source = "MyValue ::= {\n    field1 \"hello\"\n    field2 { nested \"data\" }\n}";
         ASN1Lexer lexer = new ASN1Lexer(source);
-        java.util.List<Token> tokens = lexer.tokenize();
+        lexer.tokenize();
 
         // Jetzt parsen
         ASN1Document doc = service.parse(source);
