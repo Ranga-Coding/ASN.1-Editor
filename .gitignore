@@ -23,6 +23,7 @@ build.properties
 # === AI / Agent ===
 .claude/
 .pi/
+CLAUDE.md
 
 # === Maven (local cache) ===
 .mvn/
