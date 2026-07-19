@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Button?>
+<?import com.asn1editor.ui.HexEditorControl?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TreeView?>
+<?import javafx.scene.layout.HBox?>
+
+<?import javafx.scene.layout.VBox?>
+
+<VBox fx:id="rootPane" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.asn1editor.ui.MainController"
+      style="-fx-padding: 0;">
+
+    <!-- Menüleiste -->
+    <MenuBar VBox.vgrow="NEVER">
+        <Menu text="_Datei">
+            <MenuItem text="_&#x00D6;ffnen..." onAction="#handleOpen"/>
+            <MenuItem text="_Speichern" onAction="#handleSave"/>
+            <MenuItem text="Speichern _unter..." onAction="#handleSaveAs"/>
+            <MenuItem text="Beenden" onAction="#handleExit"/>
+        </Menu>
+        <Menu text="_Bearbeitung">
+            <MenuItem text="Aktualisieren" onAction="#handleRefresh"/>
+            <MenuItem text="R&#x00FC;ckg&#x00E4;ngig" onAction="#handleUndo"/>
+            <MenuItem text="Wiederholen" onAction="#handleRedo"/>
+            <MenuItem text="Ausschneiden" onAction="#handleCut"/>
+            <MenuItem text="Kopieren" onAction="#handleCopy"/>
+            <MenuItem text="Einf&#x00FC;gen" onAction="#handlePaste"/>
+        </Menu>
+        <Menu text="_Hilfe">
+            <MenuItem text="&#x00DC;ber" onAction="#handleAbout"/>
+        </Menu>
+    </MenuBar>
+
+    <!-- Hauptbereich: TreeView links, Details + Hex-Editor rechts -->
+    <SplitPane VBox.vgrow="ALWAYS" dividerPositions="0.4">
+        <!-- Linke Seite: ASN.1-Baum -->
+        <TreeView fx:id="treeView" prefWidth="400" SplitPane.resizableWithParent="true">
+            <padding>
+                <Insets top="5" right="5" bottom="5" left="5"/>
+            </padding>
+        </TreeView>
+
+        <!-- Rechte Seite: Details und Hex-Editor nebeneinander -->
+        <SplitPane fx:id="rightSplitPane" dividerPositions="0.25">
+            <!-- Details -->
+            <TextArea fx:id="detailsArea"
+                      editable="false"
+                      wrapText="true"
+                      SplitPane.resizableWithParent="true"
+                      style="-fx-font-family: sans-serif; -fx-font-size: 11px;"/>
+
+            <!-- Hex-Editor -->
+            <VBox SplitPane.resizableWithParent="true">
+                <padding>
+                    <Insets top="5" right="5" bottom="5" left="5"/>
+                </padding>
+                <HBox VBox.vgrow="NEVER" style="-fx-padding: 0 0 4 0; -fx-spacing: 8;">
+                    <Button text="Hex anwenden" onAction="#handleApplyHex" prefWidth="120"/>
+                    <Button text="Hex neu laden" onAction="#handleReloadHexFromTree" prefWidth="120"/>
+                    <Label fx:id="hexStatusLabel" text="" HBox.hgrow="ALWAYS" style="-fx-font-size: 11px;"/>
+                </HBox>
+                <HexEditorControl fx:id="hexEditorArea" VBox.vgrow="ALWAYS"/>
+            </VBox>
+        </SplitPane>
+    </SplitPane>
+
+    <!-- Statusleiste -->
+    <HBox style="-fx-padding: 4 8; -fx-background-color: #f0f0f0; -fx-border-color: #ccc;"
+          VBox.vgrow="NEVER">
+        <Label fx:id="statusLabel" text="Bereit" VBox.vgrow="NEVER"/>
+        <HBox HBox.hgrow="ALWAYS"/>
+        <Label fx:id="cursorPosition" text="" style="-fx-font-size: 11px;"/>
+        <padding>
+            <Insets left="8"/>
+        </padding>
+    </HBox>
+</VBox>

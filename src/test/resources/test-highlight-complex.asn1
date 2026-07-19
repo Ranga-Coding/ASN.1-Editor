@@ -1,0 +1,23 @@
+-- Test-Datei für Byte-Highlighting
+-- Enthält: SEQUENCE, SET, OBJECT IDENTIFIER, Strings, Integer
+--
+-- ASN.1 Syntax (Text-ASN.1):
+--
+-- MyModule DEFINITIONS ::=
+-- BEGIN
+--
+--   MySequence SEQUENCE {
+--     id          INTEGER,
+--     description UTF8String,
+--     enabled     BOOLEAN
+--   }
+--
+--   MySet SET {
+--     name        VisibleString,
+--     value       OCTET STRING
+--   }
+--
+--   MyOID OBJECT IDENTIFIER ::= { 1 2 840 113549 }
+--
+-- END
+--

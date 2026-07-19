@@ -1,0 +1,64 @@
+# === Java / Maven ===
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+build.properties
+*.class
+
+# === IDE ===
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+.factorypath
+
+# === AI / Agent ===
+.claude/
+.pi/
+
+# === Maven (local cache) ===
+.mvn/
+
+# === OS ===
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# === Logs ===
+*.log
+asn1-editor.log
+
+# === Runtime / Temp ===
+*.tmp
+*.swp
+*.swo
+*~
+nul
+
+# === Local build artifacts ===
+DebugTest.class
+DebugTest.java
+
+# === Test files (optional — uncomment if you want to track them) ===
+TEST.crmf
+TEST2.crmf
+
+# === Platform-specific JARs in lib/ (keep source JARs) ===
+lib/*-win.jar
+lib/*-linux.jar
+lib/*-mac.jar
+
+# === Maven wrapper (keep if you distribute it, remove if not) ===
+# mvnw
+# mvnw.cmd
